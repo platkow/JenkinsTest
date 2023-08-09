@@ -1,0 +1,86 @@
+//Ex.1
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building..'
+            }
+        }
+        stage('Test any pipeline') {
+            steps {
+                echo 'Testing..'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying....'
+            }
+        }
+    }
+}
+
+//Ex. 2
+pipeline {
+    agent any
+        stages{
+            stage('Test sending mail plugin') {
+                steps {
+                    emailext body: 'Test Message',
+                        subject: 'Test Subject',
+                        to: 'ordinaltestuser@gmail.com'
+                }
+            }
+        }
+    }
+}
+
+//Ex. 3
+pipeline {
+    agent any
+        stages{
+            stage('Test') {
+                steps {
+                    sh 'mvn clean test -Dtest={testName'
+                }
+            }
+        }
+    }
+}
+
+//Ex. 4
+pipeline {
+    environment{
+        controlFlag = false
+    }
+    agent any
+        stages{
+            stage('Parallel tests') {
+                parallel{
+                    stage('Test 1')
+                        steps {
+                            sh 'mvn clean test -Dtest={shouldPass}'
+                            expression {controlFlag == true}
+                        }
+                    }
+                    stage('Test 2') {
+                        steps {
+                            sh 'mvn clean test -Dtest={shouldFail}'
+                            expression {controlFlag == false}
+                        }
+                    }
+                }
+            }
+        }
+        post{
+            when{
+                expression {controlFlag == false}
+            }
+            failure {
+                mail to: ordinaltestuser@gmail.com, subject: 'Test 2 - shouldFail - failed'
+            }
+        }
+    }
+}
