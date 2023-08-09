@@ -48,7 +48,7 @@ pipeline {
             }
         }
     }
-}
+
 
 //Ex. 4
 pipeline {
@@ -56,31 +56,30 @@ pipeline {
         controlFlag = false
     }
     agent any
-        stages{
-            stage('Parallel tests') {
-                parallel{
-                    stage('Test 1')
-                        steps {
-                            sh 'mvn clean test -Dtest={shouldPass}'
-                            expression {controlFlag == true}
-                        }
+    stages{
+        stage('Parallel tests') {
+            parallel{
+                stage('Test 1')
+                    steps {
+                        sh 'mvn clean test -Dtest={shouldPass}'
+                        expression {controlFlag = true}
                     }
-                    stage('Test 2') {
-                        steps {
-                            sh 'mvn clean test -Dtest={shouldFail}'
-                            expression {controlFlag == false}
-                        }
+                }
+                stage('Test 2') {
+                    steps {
+                        sh 'mvn clean test -Dtest={shouldFail}'
+                        expression {controlFlag = false}
                     }
                 }
             }
         }
-        post{
-            when{
-                expression {controlFlag == false}
-            }
-            failure {
-                mail to: ordinaltestuser@gmail.com, subject: 'Test 2 - shouldFail - failed'
-            }
+
+    post{
+        when{
+            expression {controlFlag == false}
+        }
+        failure {
+            mail to: ordinaltestuser@gmail.com, subject: 'Test 2 - shouldFail - failed'
         }
     }
 }
