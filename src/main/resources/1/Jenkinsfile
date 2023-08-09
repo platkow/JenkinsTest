@@ -75,11 +75,16 @@ pipeline {
         }
 
     post{
-        when{
-            expression {controlFlag == false}
-        }
-        failure {
-            mail to: ordinaltestuser@gmail.com, subject: 'Test 2 - shouldFail - failed'
-        }
+            failure {
+                emailext body: 'Test Fail Message',
+                subject: 'Test - shouldFail - failed',
+                to: 'ordinaltestuser@gmail.com'
+                    }
+
+            success {
+                emailext body: 'Test Fail Message',
+                subject: 'Test - shouldFail - failed',
+                to: 'ordinaltestuser@gmail.com'
+            }
     }
 }
